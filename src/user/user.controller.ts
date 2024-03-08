@@ -21,14 +21,21 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto): User {
+  async create(@Body() createUserDto: CreateUserDto): Promise<Partial<User>> {
     if (!createUserDto.login) {
       throw new HttpException('Login is required', HttpStatus.BAD_REQUEST);
     }
     if (!createUserDto.password) {
       throw new HttpException('Password is required', HttpStatus.BAD_REQUEST);
     }
-    return this.userService.create(createUserDto);
+    const user = await this.userService.create(createUserDto);
+    const userWithoutPassword = Object.keys(user).reduce((acc, key) => {
+      if (key !== 'password') {
+        acc[key] = user[key];
+      }
+      return acc;
+    }, {} as Partial<User>);
+    return userWithoutPassword;
   }
 
   @Get()
@@ -41,18 +48,29 @@ export class UserController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const user = this.userService.findOne(id);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    try {
+      const user = this.userService.findOne(id);
+      return user;
+    } catch (error) {
+      if (
+        error instanceof HttpException &&
+        error.getStatus() === HttpStatus.NOT_FOUND
+      ) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(
+          'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
-    return user;
   }
 
   @Put(':id')
-  updatePassword(
+  async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): User {
+  ): Promise<Partial<User>> {
     if (!uuidValidate(id)) {
       throw new HttpException(
         'updatePassword - Invalid UUID',
@@ -64,7 +82,16 @@ export class UserController {
       if (!updatedUser) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      return updatedUser;
+      const userWithoutPassword = Object.keys(updatedUser).reduce(
+        (acc, key) => {
+          if (key !== 'password') {
+            acc[key] = updatedUser[key];
+          }
+          return acc;
+        },
+        {} as Partial<User>,
+      );
+      return userWithoutPassword;
     } catch (error) {
       if (error.message === 'Old password is incorrect') {
         throw new HttpException(error.message, HttpStatus.FORBIDDEN);

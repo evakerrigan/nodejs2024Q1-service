@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
@@ -17,7 +17,6 @@ export class UserService {
   private users: User[] = [];
 
   create(createUserDto: CreateUserDto): User {
-    console.log('create user = ', createUserDto);
     const newUser: User = {
       ...createUserDto,
       id: uuidv4(),
@@ -30,17 +29,18 @@ export class UserService {
   }
 
   findAll(): User[] {
-    console.log('findAll users = ', this.users);
     return this.users;
   }
 
   findOne(id: string): User {
-    console.log('findOne user = ', id);
-    return this.users.find((user) => user.id === id);
+    const user = this.users.find((user) => user.id === id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
   update(id: string, updatePasswordDto: UpdatePasswordDto): User {
-    console.log('update user password = ', id, updatePasswordDto);
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new Error('User not found');
@@ -59,7 +59,6 @@ export class UserService {
   }
 
   remove(id: string): void {
-    console.log('remove user = ', id);
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new Error('User not found');
