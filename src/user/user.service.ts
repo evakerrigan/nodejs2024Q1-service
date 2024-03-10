@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateUserDto } from './create-user.dto';
+import { UpdatePasswordDto } from './update-password.dto';
 
 export interface User {
   id: string;
@@ -14,10 +16,10 @@ export interface User {
 export class UserService {
   private users: User[] = [];
 
-  create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): User {
-    console.log('create user = ', user);
+  create(createUserDto: CreateUserDto): User {
+    console.log('create user = ', createUserDto);
     const newUser: User = {
-      ...user,
+      ...createUserDto,
       id: uuidv4(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -37,16 +39,18 @@ export class UserService {
     return this.users.find((user) => user.id === id);
   }
 
-  update(id: string, user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): User {
-    console.log('update user = ', id, user);
+  update(id: string, updatePasswordDto: UpdatePasswordDto): User {
+    console.log('update user password = ', id, updatePasswordDto);
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new Error('User not found');
     }
+    if (this.users[index].password !== updatePasswordDto.oldPassword) {
+      throw new Error('Old password is incorrect');
+    }
     const updatedUser: User = {
-      ...user,
-      id: this.users[index].id,
-      createdAt: this.users[index].createdAt,
+      ...this.users[index],
+      password: updatePasswordDto.newPassword,
       updatedAt: Date.now(),
       version: this.users[index].version + 1,
     };
