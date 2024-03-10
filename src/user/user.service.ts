@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
+import { validate as uuidValidate } from 'uuid';
 
 export interface User {
   id: string;
@@ -41,9 +42,12 @@ export class UserService {
   }
 
   update(id: string, updatePasswordDto: UpdatePasswordDto): User {
+    if (!uuidValidate(id)) {
+      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
+    }
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     if (this.users[index].password !== updatePasswordDto.oldPassword) {
       throw new Error('Old password is incorrect');

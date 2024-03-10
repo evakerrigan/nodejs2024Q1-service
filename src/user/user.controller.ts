@@ -93,7 +93,12 @@ export class UserController {
       );
       return userWithoutPassword;
     } catch (error) {
-      if (error.message === 'Old password is incorrect') {
+      if (
+        error instanceof HttpException &&
+        error.getStatus() === HttpStatus.NOT_FOUND
+      ) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      } else if (error.message === 'Old password is incorrect') {
         throw new HttpException(error.message, HttpStatus.FORBIDDEN);
       } else {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
