@@ -19,11 +19,13 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   findAll(): Album[] {
     return this.albumService.findAll();
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string): Album {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
@@ -36,6 +38,7 @@ export class AlbumController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   create(@Body() createAlbumDto: CreateAlbumDto): Album {
     if (
       !createAlbumDto.name ||
@@ -51,6 +54,7 @@ export class AlbumController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   update(
     @Param('id') id: string,
     @Body() updateAlbumDto: CreateAlbumDto,
