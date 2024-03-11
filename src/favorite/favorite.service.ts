@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { Album, AlbumService } from 'src/album/album.service';
-import { Artist, ArtistService } from 'src/artist/artist.service';
-import { Track, TrackService } from 'src/track/track.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Album } from 'src/album/album.service';
+import { Artist } from 'src/artist/artist.service';
+import { albums, artists, tracks } from 'src/database/db';
+import { Track } from 'src/track/track.service';
 import { validate as uuidValidate } from 'uuid';
 
 export interface Favorites {
@@ -24,33 +25,33 @@ export class FavoriteService {
     tracks: [],
   };
 
-  constructor(
-    private readonly artistService: ArtistService,
-    private readonly albumService: AlbumService,
-    private readonly trackService: TrackService,
-  ) {}
-
   async findAll(): Promise<FavoritesResponse> {
-    const artists = await Promise.all(
-      this.favorites.artists.map((id) => this.artistService.findOne(id)),
+    const foundArtists = await Promise.all(
+      this.favorites.artists.map((id) => artists.find((a) => a.id === id)),
     );
-    const albums = await Promise.all(
-      this.favorites.albums.map((id) => this.albumService.findOne(id)),
+    const foundAlbums = await Promise.all(
+      this.favorites.albums.map((id) => albums.find((a) => a.id === id)),
     );
-    const tracks = await Promise.all(
-      this.favorites.tracks.map((id) => this.trackService.findOne(id)),
+    const foundTracks = await Promise.all(
+      this.favorites.tracks.map((id) => tracks.find((a) => a.id === id)),
     );
 
     return {
-      artists,
-      albums,
-      tracks,
+      artists: foundArtists.filter(Boolean),
+      albums: foundAlbums.filter(Boolean),
+      tracks: foundTracks.filter(Boolean),
     };
   }
 
   addTrack(id: string): void {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
+    }
+    if (!tracks.some((t) => t.id === id)) {
+      throw new HttpException(
+        'Track not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     this.favorites.tracks.push(id);
   }
@@ -67,6 +68,12 @@ export class FavoriteService {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
     }
+    if (!albums.some((t) => t.id === id)) {
+      throw new HttpException(
+        'Album not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     this.favorites.albums.push(id);
   }
 
@@ -81,6 +88,12 @@ export class FavoriteService {
   addArtist(id: string): void {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
+    }
+    if (!artists.some((t) => t.id === id)) {
+      throw new HttpException(
+        'Artist not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     this.favorites.artists.push(id);
   }

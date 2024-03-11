@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
 import { validate as uuidValidate } from 'uuid';
+import { users } from 'src/database/db';
 
 export interface User {
   id: string;
@@ -15,8 +16,6 @@ export interface User {
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
-
   create(createUserDto: CreateUserDto): User {
     const newUser: User = {
       ...createUserDto,
@@ -25,16 +24,16 @@ export class UserService {
       updatedAt: Date.now(),
       version: 1,
     };
-    this.users.push(newUser);
+    users.push(newUser);
     return newUser;
   }
 
   findAll(): User[] {
-    return this.users;
+    return users;
   }
 
   findOne(id: string): User {
-    const user = this.users.find((user) => user.id === id);
+    const user = users.find((user) => user.id === id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -42,31 +41,40 @@ export class UserService {
   }
 
   update(id: string, updatePasswordDto: UpdatePasswordDto): User {
+    if (
+      typeof updatePasswordDto.newPassword !== 'string' ||
+      typeof updatePasswordDto.oldPassword !== 'string'
+    ) {
+      throw new HttpException(
+        'New password and old password are required for updating a password',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const index = this.users.findIndex((user) => user.id === id);
+    const index = users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    if (this.users[index].password !== updatePasswordDto.oldPassword) {
-      throw new Error('Old password is incorrect');
+    if (users[index].password !== updatePasswordDto.oldPassword) {
+      throw new HttpException('Wrong password', HttpStatus.FORBIDDEN);
     }
     const updatedUser: User = {
-      ...this.users[index],
+      ...users[index],
       password: updatePasswordDto.newPassword,
       updatedAt: Date.now(),
-      version: this.users[index].version + 1,
+      version: users[index].version + 1,
     };
-    this.users[index] = updatedUser;
-    return this.users[index];
+    users[index] = updatedUser;
+    return users[index];
   }
 
   remove(id: string): void {
-    const index = this.users.findIndex((user) => user.id === id);
+    const index = users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new Error('User not found');
     }
-    this.users.splice(index, 1);
+    users.splice(index, 1);
   }
 }

@@ -37,12 +37,6 @@ export class TrackController {
 
   @Post()
   create(@Body() createTrackDto: CreateTrackDto): Track {
-    if (!createTrackDto.name || !createTrackDto.artistId) {
-      throw new HttpException(
-        'Missing required fields',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     return this.trackService.create(createTrackDto);
   }
 
@@ -54,12 +48,7 @@ export class TrackController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const updatedTrack = this.trackService.update(id, updateTrackDto);
-      return updatedTrack;
-    } catch (error) {
-      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
-    }
+    return this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')

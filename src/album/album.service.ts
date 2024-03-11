@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './create-album.dto';
+import { albums, tracks } from 'src/database/db';
 
 export interface Album {
   id: string;
@@ -11,44 +12,64 @@ export interface Album {
 
 @Injectable()
 export class AlbumService {
-  private albums: Album[] = [];
-
   findAll(): Album[] {
-    return this.albums;
+    return albums;
   }
 
   findOne(id: string): Album {
-    return this.albums.find((album) => album.id === id);
+    return albums.find((album) => album.id === id);
   }
 
   create(createAlbumDto: CreateAlbumDto): Album {
+    if (!createAlbumDto.name || !createAlbumDto.year) {
+      throw new HttpException(
+        'Name, year are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const newAlbum: Album = {
       id: uuidv4(),
       ...createAlbumDto,
     };
-    this.albums.push(newAlbum);
+    albums.push(newAlbum);
     return newAlbum;
   }
 
   update(id: string, updateAlbumDto: CreateAlbumDto): Album {
-    const index = this.albums.findIndex((album) => album.id === id);
+    if (
+      typeof updateAlbumDto.name !== 'string' ||
+      typeof updateAlbumDto.year !== 'number' ||
+      (typeof updateAlbumDto.artistId !== 'string' &&
+        updateAlbumDto.artistId !== null)
+    ) {
+      throw new HttpException(
+        'Name and year are required for updating an album',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const index = albums.findIndex((album) => album.id === id);
     if (index === -1) {
-      throw new Error('Album not found');
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
     const updatedAlbum: Album = {
-      ...this.albums[index],
+      ...albums[index],
       ...updateAlbumDto,
     };
-    this.albums[index] = updatedAlbum;
-    return this.albums[index];
+    albums[index] = updatedAlbum;
+    return updatedAlbum;
   }
 
   remove(id: string): boolean {
-    const index = this.albums.findIndex((album) => album.id === id);
+    const index = albums.findIndex((album) => album.id === id);
     if (index === -1) {
       return false;
     }
-    this.albums.splice(index, 1);
+    tracks.forEach((track) => {
+      if (track.albumId === id) {
+        track.albumId = null;
+      }
+    });
+    albums.splice(index, 1);
     return true;
   }
 }

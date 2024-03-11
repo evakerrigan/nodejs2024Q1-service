@@ -48,11 +48,7 @@ export class ArtistController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      return this.artistService.update(id, updateArtistDto);
-    } catch (error) {
-      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
-    }
+    return this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')

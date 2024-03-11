@@ -40,16 +40,6 @@ export class AlbumController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createAlbumDto: CreateAlbumDto): Album {
-    if (
-      !createAlbumDto.name ||
-      !createAlbumDto.year ||
-      !createAlbumDto.artistId
-    ) {
-      throw new HttpException(
-        'Name, year and artistId is required',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     return this.albumService.create(createAlbumDto);
   }
 
@@ -62,12 +52,7 @@ export class AlbumController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const updatedAlbum = this.albumService.update(id, updateAlbumDto);
-      return updatedAlbum;
-    } catch (error) {
-      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
-    }
+    return this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')

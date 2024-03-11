@@ -71,39 +71,14 @@ export class UserController {
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<Partial<User>> {
-    if (!uuidValidate(id)) {
-      throw new HttpException(
-        'updatePassword - Invalid UUID',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    try {
-      const updatedUser = this.userService.update(id, updatePasswordDto);
-      if (!updatedUser) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    const updatedUser = this.userService.update(id, updatePasswordDto);
+    const userWithoutPassword = Object.keys(updatedUser).reduce((acc, key) => {
+      if (key !== 'password') {
+        acc[key] = updatedUser[key];
       }
-      const userWithoutPassword = Object.keys(updatedUser).reduce(
-        (acc, key) => {
-          if (key !== 'password') {
-            acc[key] = updatedUser[key];
-          }
-          return acc;
-        },
-        {} as Partial<User>,
-      );
-      return userWithoutPassword;
-    } catch (error) {
-      if (
-        error instanceof HttpException &&
-        error.getStatus() === HttpStatus.NOT_FOUND
-      ) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      } else if (error.message === 'Old password is incorrect') {
-        throw new HttpException(error.message, HttpStatus.FORBIDDEN);
-      } else {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      }
-    }
+      return acc;
+    }, {} as Partial<User>);
+    return userWithoutPassword;
   }
 
   @Delete(':id')
