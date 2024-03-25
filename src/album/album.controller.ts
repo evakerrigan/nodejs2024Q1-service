@@ -20,50 +20,96 @@ export class AlbumController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(): Album[] {
-    return this.albumService.findAll();
+  async findAll(): Promise<Album[]> {
+    try {
+      const albums = await this.albumService.findAll();
+      if (!albums) {
+        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+      }
+      return albums;
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string): Album {
+  async findOne(@Param('id') id: string): Promise<Album> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const album = this.albumService.findOne(id);
-    if (!album) {
-      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    try {
+      const album = await this.albumService.findOne(id);
+      if (!album) {
+        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+      }
+      return album;
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return album;
+    // const album = this.albumService.findOne(id);
+    // if (!album) {
+    //   throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    // }
+    // return album;
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createAlbumDto: CreateAlbumDto): Album {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto): Promise<Album> {
+    try {
+      const album = await this.albumService.create(createAlbumDto);
+      return album;
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateAlbumDto: CreateAlbumDto,
-  ): Album {
+  ): Promise<Album> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    return this.albumService.update(id, updateAlbumDto);
+    try {
+      const album = await this.albumService.update(id, updateAlbumDto);
+      return album;
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): void {
+  async remove(@Param('id') id: string): Promise<void> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const isRemoved = this.albumService.remove(id);
-    if (!isRemoved) {
-      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    try {
+      const isRemoved = await this.albumService.remove(id);
+      if (!isRemoved) {
+        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+      }
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
