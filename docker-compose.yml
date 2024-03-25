@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   app:
-    container_name: eva-library-app    
+    container_name: eva-library-app 
+    image: eva-library-app-image  
     build:
       context: .
       dockerfile: Dockerfile.app
@@ -22,7 +23,8 @@ services:
       - ./src:/app/src
 
   db:
-    container_name: eva-library-postgres    
+    container_name: eva-library-postgres   
+    image: eva-library-postgres-image 
     build:
       context: .
       dockerfile: Dockerfile.postgres
