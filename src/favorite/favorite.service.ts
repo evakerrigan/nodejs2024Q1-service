@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -10,20 +6,10 @@ export class FavoriteService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    const artistsPromise = this.prisma.favoriteArtist.findMany({
-      select: { artist: true },
-    });
-    const albumsPromise = this.prisma.favoriteAlbum.findMany({
-      select: { album: true },
-    });
-    const tracksPromise = this.prisma.favoriteTrack.findMany({
-      select: { track: true },
-    });
-
     const [artists, albums, tracks] = await Promise.all([
-      artistsPromise,
-      albumsPromise,
-      tracksPromise,
+      this.prisma.favoriteArtist.findMany({ select: { artist: true } }),
+      this.prisma.favoriteAlbum.findMany({ select: { album: true } }),
+      this.prisma.favoriteTrack.findMany({ select: { track: true } }),
     ]);
 
     return {
@@ -37,7 +23,10 @@ export class FavoriteService {
     try {
       await this.prisma.favoriteArtist.create({ data: { artistId: id } });
     } catch {
-      throw new UnprocessableEntityException(`Artist not found`);
+      throw new HttpException(
+        'Artist not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
   }
 
@@ -45,7 +34,10 @@ export class FavoriteService {
     try {
       await this.prisma.favoriteAlbum.create({ data: { albumId: id } });
     } catch {
-      throw new UnprocessableEntityException(`Album not found`);
+      throw new HttpException(
+        'Album not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
   }
 
@@ -55,7 +47,10 @@ export class FavoriteService {
         data: { trackId: id },
       });
     } catch {
-      throw new UnprocessableEntityException(`Track not found`);
+      throw new HttpException(
+        'Track not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
   }
 
@@ -63,7 +58,7 @@ export class FavoriteService {
     try {
       await this.prisma.favoriteArtist.delete({ where: { artistId: id } });
     } catch {
-      throw new NotFoundException(`Artist not found`);
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -71,7 +66,7 @@ export class FavoriteService {
     try {
       await this.prisma.favoriteAlbum.delete({ where: { albumId: id } });
     } catch {
-      throw new NotFoundException(`Album not found`);
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -79,7 +74,7 @@ export class FavoriteService {
     try {
       await this.prisma.favoriteTrack.delete({ where: { trackId: id } });
     } catch {
-      throw new NotFoundException(`Track not found`);
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }
   }
 }

@@ -53,16 +53,16 @@ export class ArtistController {
 
   @Post()
   async create(@Body() createArtistDto: CreateArtistDto): Promise<Artist> {
-    try {
-      const artist = await this.artistService.create(createArtistDto);
-      return artist;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    // return this.artistService.create(createArtistDto);
+    // try {
+    //   const artist = await this.artistService.create(createArtistDto);
+    //   return artist;
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
+    return await this.artistService.create(createArtistDto);
   }
 
   @Put(':id')
