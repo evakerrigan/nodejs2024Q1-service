@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './create-track.dto';
-import { Track as PrismaTrack } from '@prisma/client';
+// import { Track as PrismaTrack } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 // import { tracks } from 'src/database/db';
 
@@ -23,17 +23,17 @@ export class TrackService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<PrismaTrack[]> {
+  async findAll(): Promise<Track[]> {
     return await this.prisma.track.findMany();
   }
 
-  async findOne(id: string): Promise<PrismaTrack | null> {
+  async findOne(id: string): Promise<Track | null> {
     return await this.prisma.track.findUnique({
       where: { id },
     });
   }
 
-  async create(createTrackDto: CreateTrackDto): Promise<PrismaTrack> {
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
     if (!createTrackDto.name || !createTrackDto.duration) {
       throw new HttpException(
         'Missing required fields',
@@ -49,10 +49,7 @@ export class TrackService {
     });
   }
 
-  async update(
-    id: string,
-    updateTrackDto: CreateTrackDto,
-  ): Promise<PrismaTrack> {
+  async update(id: string, updateTrackDto: CreateTrackDto): Promise<Track> {
     if (
       typeof updateTrackDto.name !== 'string' ||
       typeof updateTrackDto.duration !== 'number' ||

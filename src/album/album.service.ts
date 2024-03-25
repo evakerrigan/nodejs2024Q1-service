@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Album as PrismaAlbum } from '@prisma/client';
+// import { Album as PrismaAlbum } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './create-album.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -22,11 +22,11 @@ export class AlbumService {
   //   this.prisma = new PrismaClient();
   // }
 
-  async findAll(): Promise<PrismaAlbum[]> {
+  async findAll(): Promise<Album[]> {
     return this.prisma.album.findMany();
   }
 
-  async findOne(id: string): Promise<PrismaAlbum> {
+  async findOne(id: string): Promise<Album> {
     const album = await this.prisma.album.findUnique({
       where: { id },
     });
@@ -36,7 +36,7 @@ export class AlbumService {
     return album;
   }
 
-  async create(createAlbumDto: CreateAlbumDto): Promise<PrismaAlbum> {
+  async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
     if (!createAlbumDto.name || !createAlbumDto.year) {
       throw new HttpException(
         'Name, year are required',
@@ -52,10 +52,7 @@ export class AlbumService {
     return newAlbum;
   }
 
-  async update(
-    id: string,
-    updateAlbumDto: CreateAlbumDto,
-  ): Promise<PrismaAlbum> {
+  async update(id: string, updateAlbumDto: CreateAlbumDto): Promise<Album> {
     if (
       typeof updateAlbumDto.name !== 'string' ||
       typeof updateAlbumDto.year !== 'number' ||

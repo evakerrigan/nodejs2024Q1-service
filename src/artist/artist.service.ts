@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { Artist as PrismaArtist } from '@prisma/client';
+// import { Artist as PrismaArtist } from '@prisma/client';
 import { CreateArtistDto } from './create-artist.dto';
 // import { albums, artists, tracks } from 'src/database/db';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -21,11 +21,11 @@ export class ArtistService {
   //   this.prisma = new PrismaClient();
   // }
 
-  async findAll(): Promise<PrismaArtist[]> {
+  async findAll(): Promise<Artist[]> {
     return this.prisma.artist.findMany();
   }
 
-  async findOne(id: string): Promise<PrismaArtist> {
+  async findOne(id: string): Promise<Artist> {
     const artist = await this.prisma.artist.findUnique({
       where: { id },
     });
@@ -35,7 +35,7 @@ export class ArtistService {
     return artist;
   }
 
-  async create(createArtistDto: CreateArtistDto): Promise<PrismaArtist> {
+  async create(createArtistDto: CreateArtistDto): Promise<Artist> {
     if (!createArtistDto.name || !createArtistDto.grammy) {
       throw new HttpException(
         'Name, year are required',
@@ -51,10 +51,7 @@ export class ArtistService {
     return newArtist;
   }
 
-  async update(
-    id: string,
-    updateArtistDto: CreateArtistDto,
-  ): Promise<PrismaArtist> {
+  async update(id: string, updateArtistDto: CreateArtistDto): Promise<Artist> {
     const artist = await this.prisma.artist.findUnique({
       where: { id },
     });
