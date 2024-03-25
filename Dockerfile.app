@@ -23,4 +23,5 @@ WORKDIR /app
 COPY --from=builder /app .
 
 # Запускаем приложение
-CMD ["npm", "run", "start:dev"]
+# CMD ["npm", "run", "start:dev"]
+CMD npx prisma generate && npx prisma migrate dev --name init && npm run start:dev
