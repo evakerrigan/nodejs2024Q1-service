@@ -21,18 +21,18 @@ export class AlbumController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<Album[]> {
-    try {
-      const albums = await this.albumService.findAll();
-      if (!albums) {
-        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
-      }
-      return albums;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const albums = await this.albumService.findAll();
+    if (!albums) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
+    return albums;
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 
   @Get(':id')
@@ -41,18 +41,18 @@ export class AlbumController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const album = await this.albumService.findOne(id);
-      if (!album) {
-        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
-      }
-      return album;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const album = await this.albumService.findOne(id);
+    if (!album) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
+    return album;
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
     // const album = this.albumService.findOne(id);
     // if (!album) {
     //   throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
@@ -63,15 +63,15 @@ export class AlbumController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createAlbumDto: CreateAlbumDto): Promise<Album> {
-    try {
-      const album = await this.albumService.create(createAlbumDto);
-      return album;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    // try {
+    const album = await this.albumService.create(createAlbumDto);
+    return album;
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 
   @Put(':id')
@@ -83,15 +83,18 @@ export class AlbumController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const album = await this.albumService.update(id, updateAlbumDto);
-      return album;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const album = await this.albumService.findOne(id);
+    if (!album) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
+    return await this.albumService.update(id, updateAlbumDto);
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 
   @Delete(':id')
@@ -100,16 +103,16 @@ export class AlbumController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const isRemoved = await this.albumService.remove(id);
-      if (!isRemoved) {
-        throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
-      }
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const isRemoved = await this.albumService.remove(id);
+    if (!isRemoved) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 }

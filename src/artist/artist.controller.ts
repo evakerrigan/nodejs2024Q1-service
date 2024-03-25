@@ -73,15 +73,18 @@ export class ArtistController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const artist = await this.artistService.update(id, updateArtistDto);
-      return artist;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     }
+    return await this.artistService.update(id, updateArtistDto);
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
     // return this.artistService.update(id, updateArtistDto);
   }
 
