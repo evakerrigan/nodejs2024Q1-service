@@ -21,7 +21,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto): Promise<Partial<User>> {
     if (!createUserDto.login) {
       throw new HttpException('Login is required', HttpStatus.BAD_REQUEST);
@@ -41,16 +40,23 @@ export class UserController {
 
   @Get()
   async findAll(): Promise<Partial<User>[]> {
-    const users = await this.userService.findAll();
-    return users.map((user) => {
-      const userWithoutPassword = Object.keys(user).reduce((acc, key) => {
-        if (key !== 'password') {
-          acc[key] = user[key];
-        }
-        return acc;
-      }, {} as Partial<User>);
-      return userWithoutPassword;
-    });
+    try {
+      const users = await this.userService.findAll();
+      return users.map((user) => {
+        const userWithoutPassword = Object.keys(user).reduce((acc, key) => {
+          if (key !== 'password') {
+            acc[key] = user[key];
+          }
+          return acc;
+        }, {} as Partial<User>);
+        return userWithoutPassword;
+      });
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id')
@@ -58,15 +64,25 @@ export class UserController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const user = await this.userService.findOne(id);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    try {
+      const user = await this.userService.findOne(id);
+      return user;
+    } catch (error) {
+      if (
+        error instanceof HttpException &&
+        error.getStatus() === HttpStatus.NOT_FOUND
+      ) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(
+          'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
-    return user;
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.CREATED)
   async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
@@ -87,6 +103,6 @@ export class UserController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    await this.userService.remove(id);
+    return await this.userService.remove(id);
   }
 }
