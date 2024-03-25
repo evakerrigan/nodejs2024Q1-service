@@ -29,11 +29,18 @@ npm i
 ```
 cp .env.example .env
 ```
-
+# Start app 
 ## Open a terminal and run the command:
 
 ```
 npm run start:dev
+```
+
+# Open in docker
+## Make sure that docker is running. Run containers
+
+```
+npm run docker
 ```
 
 ## Open another terminal and run the command:
