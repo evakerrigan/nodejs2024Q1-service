@@ -8,13 +8,15 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm ci && npm cache clean --force
 
 # Копируем исходный код приложения
 COPY . .
 
 # Собираем приложение
 RUN npm run build
+
+EXPOSE ${PORT}
 
 # Запускаем приложение
 CMD ["npm", "run", "start:dev"]

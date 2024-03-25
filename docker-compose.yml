@@ -1,22 +1,39 @@
 version: '3.8'
+
 services:
   app:
-    build: .
+    container_name: eva-app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     ports:
-      - '4000:4000'
+      - ${PORT}:${PORT}
     depends_on:
       - db
+    networks:
+      - eva-network
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/database_name
+
   db:
-    image: postgres:13.5
-    volumes:
-      - postgres:/var/lib/postgresql/data
+    container_name: eva-postgres
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: database_name
+    networks:
+      - eva-network
     ports:
       - '5432:5432'
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
 volumes:
   postgres:
+
+networks:
+  eva-network:
+    driver: bridge
