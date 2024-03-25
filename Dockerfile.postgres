@@ -1,7 +1,2 @@
 # Использовать официальный образ PostgreSQL
 FROM postgres:16.2-alpine3.19
-
-# Установить переменные окружения для PostgreSQL
-ENV POSTGRES_USER=user
-ENV POSTGRES_PASSWORD=password
-ENV POSTGRES_DB=database_name

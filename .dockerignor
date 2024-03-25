@@ -1,6 +1,7 @@
 node_modules
 dist
-Dockerfile
+Dockerfile.app
+Dockerfile.postgres
 .env
 .github
 .git

@@ -2,7 +2,7 @@
 FROM node:20.11-alpine3.19 as builder
 
 # Устанавливаем рабочую директорию в контейнере
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Копируем package.json и package-lock.json
 COPY ["package.json", "package-lock.json*", "./"]
@@ -18,11 +18,9 @@ RUN npm run build
 
 FROM node:20.11-alpine3.19 as runner
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY --from=builder /usr/src/app .
-
-EXPOSE ${PORT}
+COPY --from=builder /app .
 
 # Запускаем приложение
 CMD ["npm", "run", "start:dev"]

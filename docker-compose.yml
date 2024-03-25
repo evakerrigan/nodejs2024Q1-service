@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   app:
-    container_name: eva-app    
+    container_name: eva-library-app    
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.app
     ports:
       - ${PORT}:${PORT}
     restart: always
@@ -17,12 +17,12 @@ services:
       - eva-network
     environment:
       PORT: ${PORT}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
     volumes:
       - ./src:/app/src
 
   db:
-    container_name: eva-postgres    
+    container_name: eva-library-postgres    
     build:
       context: .
       dockerfile: Dockerfile.postgres
