@@ -1,6 +1,11 @@
-/node_modules
-/dist
-node_modules/
-dist/
+node_modules
+dist
+Dockerfile
+.env
+.github
+.git
+.gitignore
+.vscode
+.dockerignore
+npm-debug.log
 *.log
-.vscode/
