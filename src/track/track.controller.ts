@@ -19,16 +19,16 @@ export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
-  findAll(): Track[] {
-    return this.trackService.findAll();
+  async findAll(): Promise<Track[]> {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Track {
+  async findOne(@Param('id') id: string): Promise<Track> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const track = this.trackService.findOne(id);
+    const track = await this.trackService.findOne(id);
     if (!track) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }
@@ -36,28 +36,28 @@ export class TrackController {
   }
 
   @Post()
-  create(@Body() createTrackDto: CreateTrackDto): Track {
-    return this.trackService.create(createTrackDto);
+  async create(@Body() createTrackDto: CreateTrackDto): Promise<Track> {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateTrackDto: CreateTrackDto,
-  ): Track {
+  ): Promise<Track> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    return this.trackService.update(id, updateTrackDto);
+    return await this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): void {
+  async remove(@Param('id') id: string): Promise<void> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const isRemoved = this.trackService.remove(id);
+    const isRemoved = await this.trackService.remove(id);
     if (!isRemoved) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }

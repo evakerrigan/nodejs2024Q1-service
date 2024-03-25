@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './create-track.dto';
-import { tracks } from 'src/database/db';
+import { PrismaClient, Track as PrismaTrack } from '@prisma/client';
+// import { PrismaService } from 'src/prisma/prisma.service';
+// import { tracks } from 'src/database/db';
 
 export interface Track {
   id: string;
@@ -13,15 +15,22 @@ export interface Track {
 
 @Injectable()
 export class TrackService {
-  findAll(): Track[] {
-    return tracks;
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+  async findAll(): Promise<PrismaTrack[]> {
+    return await this.prisma.track.findMany();
   }
 
-  findOne(id: string): Track {
-    return tracks.find((track) => track.id === id);
+  async findOne(id: string): Promise<PrismaTrack | null> {
+    return await this.prisma.track.findUnique({
+      where: { id },
+    });
   }
 
-  create(createTrackDto: CreateTrackDto): Track {
+  async create(createTrackDto: CreateTrackDto): Promise<PrismaTrack> {
     if (!createTrackDto.name || !createTrackDto.duration) {
       throw new HttpException(
         'Missing required fields',
@@ -32,11 +41,15 @@ export class TrackService {
       id: uuidv4(),
       ...createTrackDto,
     };
-    tracks.push(newTrack);
-    return newTrack;
+    return await this.prisma.track.create({
+      data: newTrack,
+    });
   }
 
-  update(id: string, updateTrackDto: CreateTrackDto): Track {
+  async update(
+    id: string,
+    updateTrackDto: CreateTrackDto,
+  ): Promise<PrismaTrack> {
     if (
       typeof updateTrackDto.name !== 'string' ||
       typeof updateTrackDto.duration !== 'number' ||
@@ -50,24 +63,39 @@ export class TrackService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const index = tracks.findIndex((track) => track.id === id);
-    if (index === -1) {
+    const track = await this.prisma.track.update({
+      where: { id },
+      data: updateTrackDto,
+    });
+
+    if (!track) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }
-    const updatedTrack: Track = {
-      ...tracks[index],
-      ...updateTrackDto,
-    };
-    tracks[index] = updatedTrack;
-    return tracks[index];
+
+    return track;
+    // const index = tracks.findIndex((track) => track.id === id);
+    // if (index === -1) {
+    //   throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    // }
+    // const updatedTrack: Track = {
+    //   ...tracks[index],
+    //   ...updateTrackDto,
+    // };
+    // tracks[index] = updatedTrack;
+    // return tracks[index];
   }
 
-  remove(id: string): boolean {
-    const index = tracks.findIndex((track) => track.id === id);
-    if (index === -1) {
-      return false;
-    }
-    tracks.splice(index, 1);
-    return true;
+  async remove(id: string): Promise<boolean> {
+    const result = await this.prisma.track.delete({
+      where: { id },
+    });
+
+    return !!result;
+    // const index = tracks.findIndex((track) => track.id === id);
+    // if (index === -1) {
+    //   return false;
+    // }
+    // tracks.splice(index, 1);
+    // return true;
   }
 }
