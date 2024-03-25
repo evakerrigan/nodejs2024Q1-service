@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     container_name: eva-app
-    restart: unless-stopped
+    restart: always
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -18,7 +18,7 @@ services:
 
   db:
     container_name: eva-postgres
-    restart: unless-stopped
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile.postgres
