@@ -2,34 +2,41 @@ version: '3.8'
 
 services:
   app:
-    container_name: eva-app
-    restart: always
+    container_name: eva-app    
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     ports:
       - ${PORT}:${PORT}
+    restart: always
+    env_file:
+      - .env
     depends_on:
       - db
     networks:
       - eva-network
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/database_name
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - ./src:/app/src
 
   db:
-    container_name: eva-postgres
-    restart: always
+    container_name: eva-postgres    
     build:
       context: .
       dockerfile: Dockerfile.postgres
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: database_name
     networks:
       - eva-network
     ports:
-      - '5432:5432'
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres:/var/lib/postgresql/data
 
