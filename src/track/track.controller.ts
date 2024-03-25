@@ -48,6 +48,10 @@ export class TrackController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
+    const track = await this.trackService.findOne(id);
+    if (!track) {
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    }
     return await this.trackService.update(id, updateTrackDto);
   }
 
@@ -56,6 +60,10 @@ export class TrackController {
   async remove(@Param('id') id: string): Promise<void> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
+    }
+    const track = await this.trackService.findOne(id);
+    if (!track) {
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }
     const isRemoved = await this.trackService.remove(id);
     if (!isRemoved) {
