@@ -1,8 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaClient, Artist as PrismaArtist } from '@prisma/client';
+import { Artist as PrismaArtist } from '@prisma/client';
 import { CreateArtistDto } from './create-artist.dto';
 // import { albums, artists, tracks } from 'src/database/db';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface Artist {
   id: string;
@@ -12,11 +13,13 @@ export interface Artist {
 
 @Injectable()
 export class ArtistService {
-  private prisma: PrismaClient;
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  // private prisma: PrismaClient;
+
+  // constructor() {
+  //   this.prisma = new PrismaClient();
+  // }
 
   async findAll(): Promise<PrismaArtist[]> {
     return this.prisma.artist.findMany();

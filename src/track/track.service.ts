@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './create-track.dto';
-import { PrismaClient, Track as PrismaTrack } from '@prisma/client';
-// import { PrismaService } from 'src/prisma/prisma.service';
+import { Track as PrismaTrack } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 // import { tracks } from 'src/database/db';
 
 export interface Track {
@@ -15,11 +15,14 @@ export interface Track {
 
 @Injectable()
 export class TrackService {
-  private prisma: PrismaClient;
+  // private prisma: PrismaClient;
 
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  // constructor() {
+  //   this.prisma = new PrismaClient();
+  // }
+
+  constructor(private readonly prisma: PrismaService) {}
+
   async findAll(): Promise<PrismaTrack[]> {
     return await this.prisma.track.findMany();
   }

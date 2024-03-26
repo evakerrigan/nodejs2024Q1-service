@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaClient, Album as PrismaAlbum } from '@prisma/client';
+import { Album as PrismaAlbum } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './create-album.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 // import { albums, tracks } from 'src/database/db';
 
 export interface Album {
@@ -13,11 +14,13 @@ export interface Album {
 
 @Injectable()
 export class AlbumService {
-  private prisma: PrismaClient;
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  // private prisma: PrismaClient;
+
+  // constructor() {
+  //   this.prisma = new PrismaClient();
+  // }
 
   async findAll(): Promise<PrismaAlbum[]> {
     return this.prisma.album.findMany();
