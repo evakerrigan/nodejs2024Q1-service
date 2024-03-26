@@ -3,79 +3,58 @@ import {
   Get,
   Post,
   Delete,
-  Param,
-  HttpStatus,
-  HttpException,
   HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
-import { FavoriteService, FavoritesResponse } from './favorite.service';
+import { FavoriteService } from './favorite.service';
 
 @Controller('favs')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
   @Get()
-  async findAll(): Promise<FavoritesResponse> {
-    try {
-      const favorites = await this.favoriteService.findAll();
-      return favorites;
-    } catch (error) {
-      throw new HttpException(
-        'Error fetching favorites',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @HttpCode(HttpStatus.OK)
+  async findAll() {
+    return await this.favoriteService.findAll();
   }
 
-  @Post('track/:id')
-  addTrack(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.addTrack(id);
+  @Post('/artist/:id')
+  @HttpCode(HttpStatus.CREATED)
+  async addArtistToFavorites(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.favoriteService.addArtistToFavorites(id);
   }
 
-  @Delete('track/:id')
+  @Post('/album/:id')
+  @HttpCode(HttpStatus.CREATED)
+  async addAlbumToFavorites(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.favoriteService.addAlbumToFavorites(id);
+  }
+
+  @Post('/track/:id')
+  @HttpCode(HttpStatus.CREATED)
+  async addTrackToFavorites(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.favoriteService.addTrackToFavorites(id);
+  }
+
+  @Delete('/artist/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeTrack(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.removeTrack(id);
+  async removeArtistFromFavorites(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return await this.favoriteService.removeArtistFromFavorites(id);
   }
 
-  @Post('album/:id')
-  addAlbum(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.addAlbum(id);
-  }
-
-  @Delete('album/:id')
+  @Delete('/album/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeAlbum(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.removeAlbum(id);
+  async removeAlbumFromFavorites(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.favoriteService.removeAlbumFromFavorites(id);
   }
 
-  @Post('artist/:id')
-  addArtist(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.addArtist(id);
-  }
-
-  @Delete('artist/:id')
+  @Delete('/track/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeArtist(@Param('id') id: string): void {
-    if (!uuidValidate(id)) {
-      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
-    }
-    this.favoriteService.removeArtist(id);
+  async removeTrackFromFavorites(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.favoriteService.removeTrackFromFavorites(id);
   }
 }
