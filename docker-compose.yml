@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: eva-library-app 
+    image: eva-library-app-image  
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - eva-network
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+    volumes:
+      - ./src:/app/src
+
+  db:
+    container_name: eva-library-postgres   
+    image: eva-library-postgres-image 
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    networks:
+      - eva-network
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:
+
+networks:
+  eva-network:
+    driver: bridge

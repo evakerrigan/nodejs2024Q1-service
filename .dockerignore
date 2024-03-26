@@ -1,0 +1,12 @@
+node_modules
+dist
+Dockerfile.app
+Dockerfile.postgres
+.env
+.github
+.git
+.gitignore
+.vscode
+.dockerignore
+npm-debug.log
+*.log

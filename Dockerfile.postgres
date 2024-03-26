@@ -1,0 +1,2 @@
+# Использовать официальный образ PostgreSQL
+FROM postgres:16.2-alpine3.19

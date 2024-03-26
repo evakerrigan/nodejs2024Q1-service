@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  login     String   @unique
+  password  String
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Album {
+  id         String      @id @default(uuid())
+  name       String
+  year       Int
+  artistId   String?     @unique  
+  tracks     Track[]
+  favorite   FavoriteAlbum?
+
+  artist     Artist?     @relation(fields: [artistId], references: [id], onDelete: SetNull)
+}
+
+model Artist {
+  id          String       @id @default(uuid())
+  name        String
+  grammy      Boolean
+  albums      Album[]
+  tracks      Track[]
+  favorite    FavoriteArtist?
+}
+
+model Track {
+  id         String      @id @default(uuid())
+  name       String  
+  artistId   String?     @unique  
+  albumId    String?     @unique
+  duration   Int
+  favorite   FavoriteTrack?
+
+  artist     Artist?     @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  album      Album?      @relation(fields: [albumId], references: [id], onDelete: SetNull)
+}
+
+model FavoriteAlbum {
+  id      String @id @default(uuid())  
+  albumId String @unique
+
+  album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+}
+
+model FavoriteArtist {
+  id       String @id @default(uuid())  
+  artistId String @unique
+
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+}
+
+model FavoriteTrack {
+  id      String @id @default(uuid())  
+  trackId String @unique
+
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+}
