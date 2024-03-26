@@ -37,18 +37,18 @@ export class ArtistController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      const artist = await this.artistService.findOne(id);
-      if (!artist) {
-        throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
-      }
-      return artist;
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     }
+    return artist;
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 
   @Post()
@@ -91,14 +91,18 @@ export class ArtistController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    try {
-      await this.artistService.remove(id);
-    } catch (error) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // try {
+    const isRemoved = await this.artistService.findOne(id);
+    if (!isRemoved) {
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     }
+    await this.artistService.remove(id);
+    // } catch (error) {
+    //   throw new HttpException(
+    //     'Internal server error',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
     // const isRemoved = this.artistService.remove(id);
     // if (!isRemoved) {
     //   throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
