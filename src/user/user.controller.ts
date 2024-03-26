@@ -103,10 +103,6 @@ export class UserController {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const user = await this.userService.findOne(id);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    this.userService.remove(id);
+    return await this.userService.remove(id);
   }
 }
