@@ -1,5 +1,5 @@
 export class CreateUserDto {
   login: string;
   password: string;
-  version = 1;
+  version? = 1;
 }
