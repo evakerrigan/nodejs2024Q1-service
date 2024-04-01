@@ -22,7 +22,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async getTokens(payload: Payload): Promise<string[]> {
+  async generateTokens(payload: Payload): Promise<string[]> {
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET_KEY || 'secret123123',
       expiresIn: process.env.TOKEN_EXPIRE_TIME || '1h',
@@ -55,7 +55,7 @@ export class AuthService {
         },
       );
       const payload = { userId, login };
-      return await this.getTokens(payload);
+      return await this.generateTokens(payload);
     } catch (error) {
       return null;
     }
@@ -94,7 +94,7 @@ export class AuthService {
     const user = await this.userService.findOneByLogin(authDto.login);
     const { id: userId, login } = user;
 
-    const [accessToken, refreshToken] = await this.getTokens({
+    const [accessToken, refreshToken] = await this.generateTokens({
       userId,
       login,
     });
