@@ -4,9 +4,6 @@ info:
   description: Home music library service
   version: 1.0.0
 
-servers:
-  - url: /doc
-
 components:
   schemas:
     User:
@@ -117,7 +114,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /login:
+  /auth/login:
     post:
       tags:
         - Login
@@ -139,8 +136,8 @@ paths:
                   type: string
                   description: Password
               required:
-                - user
                 - login
+                - lpassword
       responses:
         200:
           description: Successful login.
@@ -148,13 +145,18 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  token:
+              properties:
+                  accessToken:
                     type: string
-                description: JWT Token
+                    description: JWT Token
+                  refreshToken:
+                    type: string
+                    description: JWT Token
+        400:
+          description: Bad request. No login or password, or they are not a strings.
         403:
           description: Incorrect login or password
-  /signup:
+  /auth/signup:
     post:
       tags:
         - Signup
@@ -186,9 +188,47 @@ paths:
         204:
           description: Successful signup
         400:
-          description: Bad request
-        409:
-          description: Conflict. Login already exists
+          description: Bad request. No login or password, or they are not a strings.
+  /auth/refresh:
+    post:
+      tags:
+        - Refresh
+      security: []
+      summary: Refresh
+      description: Refresh JWT-tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                refreshToken:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                  description: Refresh token
+              required:
+                - refreshToken
+      responses:
+        200:
+          description: Successful refresh
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    description: JWT Refresh Token
+                  refreshToken:
+                    type: string
+                    description: JWT Refresh Token
+        401:
+          description: No refresh token.
+        403:
+          description: Refresh token is invalid or expired.
   /user:
     get:
       tags:
@@ -740,7 +780,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         404:
           description: Artist was not found.
-  /fav:
+  /favs:
     get:
       tags:
         - Favorites
@@ -755,7 +795,7 @@ paths:
                 $ref: '#/components/schemas/Favorites'
         401:
           $ref: '#/components/responses/UnauthorizedError'
-  /fav/track/{id}:
+  /favs/track/{id}:
     parameters:
       - name: id
         in: path
@@ -791,7 +831,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         404:
           description: Track was not found.
-  /fav/album/{id}:
+  /favs/album/{id}:
     parameters:
       - name: id
         in: path
@@ -827,7 +867,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         404:
           description: Album was not found.
-  /fav/artist/{id}:
+  /favs/artist/{id}:
     parameters:
       - name: id
         in: path
