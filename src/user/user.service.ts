@@ -4,6 +4,7 @@ import { UpdatePasswordDto } from './update-password.dto';
 import { validate as uuidValidate } from 'uuid';
 // import { PrismaClient } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 export interface User {
   id: string;
@@ -102,5 +103,31 @@ export class UserService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     await this.prisma.user.delete({ where: { id } });
+  }
+
+  async findOneByLogin(login: string) {
+    return await this.prisma.user.findUnique({ where: { login } });
+  }
+
+  async isLoginExist(login: string) {
+    const user = await this.prisma.user.findUnique({ where: { login } });
+    if (!user) {
+      return false;
+    }
+    return true;
+  }
+
+  async isUserValid(login: string, password: string) {
+    const user = await this.prisma.user.findUnique({ where: { login } });
+    if (!user) {
+      return null;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return null;
+    }
+
+    return user;
   }
 }

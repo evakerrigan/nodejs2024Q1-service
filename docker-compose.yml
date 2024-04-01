@@ -21,6 +21,7 @@ services:
       DATABASE_URL: ${DATABASE_URL_DOCKER}
     volumes:
       - ./src:/app/src
+      - ./logs:/app/logs
 
   db:
     container_name: eva-library-postgres   
