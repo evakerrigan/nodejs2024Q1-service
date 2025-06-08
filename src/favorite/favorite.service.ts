@@ -6,6 +6,7 @@ import { Track } from 'src/track/track.service';
 import { validate as uuidValidate } from 'uuid';
 
 export interface Favorites {
+  userId: string;
   artists: string[];
   albums: string[];
   tracks: string[];
@@ -20,6 +21,7 @@ export interface FavoritesResponse {
 @Injectable()
 export class FavoriteService {
   private favorites: Favorites = {
+    userId: '',
     artists: [],
     albums: [],
     tracks: [],
