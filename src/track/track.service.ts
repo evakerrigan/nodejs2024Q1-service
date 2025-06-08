@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './create-track.dto';
-import { tracks } from 'src/database/db';
+import { db } from 'src/database/db';
 
 export interface Track {
   id: string;
@@ -14,11 +14,11 @@ export interface Track {
 @Injectable()
 export class TrackService {
   findAll(): Track[] {
-    return tracks;
+    return db.tracks;
   }
 
   findOne(id: string): Track {
-    return tracks.find((track) => track.id === id);
+    return db.tracks.find((track) => track.id === id);
   }
 
   create(createTrackDto: CreateTrackDto): Track {
@@ -32,7 +32,7 @@ export class TrackService {
       id: uuidv4(),
       ...createTrackDto,
     };
-    tracks.push(newTrack);
+    db.tracks.push(newTrack);
     return newTrack;
   }
 
@@ -50,24 +50,24 @@ export class TrackService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const index = tracks.findIndex((track) => track.id === id);
+    const index = db.tracks.findIndex((track) => track.id === id);
     if (index === -1) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     }
     const updatedTrack: Track = {
-      ...tracks[index],
+      ...db.tracks[index],
       ...updateTrackDto,
     };
-    tracks[index] = updatedTrack;
-    return tracks[index];
+    db.tracks[index] = updatedTrack;
+    return db.tracks[index];
   }
 
   remove(id: string): boolean {
-    const index = tracks.findIndex((track) => track.id === id);
+    const index = db.tracks.findIndex((track) => track.id === id);
     if (index === -1) {
       return false;
     }
-    tracks.splice(index, 1);
+    db.tracks.splice(index, 1);
     return true;
   }
 }

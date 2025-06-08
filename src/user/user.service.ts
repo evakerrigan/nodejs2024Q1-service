@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
 import { validate as uuidValidate } from 'uuid';
-import { users } from 'src/database/db';
+import { db } from 'src/database/db';
 
 export interface User {
   id: string;
@@ -24,16 +24,16 @@ export class UserService {
       updatedAt: Date.now(),
       version: 1,
     };
-    users.push(newUser);
+    db.users.push(newUser);
     return newUser;
   }
 
   findAll(): User[] {
-    return users;
+    return db.users;
   }
 
   findOne(id: string): User {
-    const user = users.find((user) => user.id === id);
+    const user = db.users.find((user) => user.id === id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -53,28 +53,28 @@ export class UserService {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const index = users.findIndex((user) => user.id === id);
+    const index = db.users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    if (users[index].password !== updatePasswordDto.oldPassword) {
+    if (db.users[index].password !== updatePasswordDto.oldPassword) {
       throw new HttpException('Wrong password', HttpStatus.FORBIDDEN);
     }
     const updatedUser: User = {
-      ...users[index],
+      ...db.users[index],
       password: updatePasswordDto.newPassword,
       updatedAt: Date.now(),
-      version: users[index].version + 1,
+      version: db.users[index].version + 1,
     };
-    users[index] = updatedUser;
-    return users[index];
+    db.users[index] = updatedUser;
+    return db.users[index];
   }
 
   remove(id: string): void {
-    const index = users.findIndex((user) => user.id === id);
+    const index = db.users.findIndex((user) => user.id === id);
     if (index === -1) {
       throw new Error('User not found');
     }
-    users.splice(index, 1);
+    db.users.splice(index, 1);
   }
 }

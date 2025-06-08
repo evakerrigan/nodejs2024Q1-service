@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './create-album.dto';
-import { albums, tracks } from 'src/database/db';
+import { db } from 'src/database/db';
 
 export interface Album {
   id: string;
@@ -13,11 +13,11 @@ export interface Album {
 @Injectable()
 export class AlbumService {
   findAll(): Album[] {
-    return albums;
+    return db.albums;
   }
 
   findOne(id: string): Album {
-    return albums.find((album) => album.id === id);
+    return db.albums.find((album) => album.id === id);
   }
 
   create(createAlbumDto: CreateAlbumDto): Album {
@@ -31,7 +31,7 @@ export class AlbumService {
       id: uuidv4(),
       ...createAlbumDto,
     };
-    albums.push(newAlbum);
+    db.albums.push(newAlbum);
     return newAlbum;
   }
 
@@ -47,29 +47,29 @@ export class AlbumService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const index = albums.findIndex((album) => album.id === id);
+    const index = db.albums.findIndex((album) => album.id === id);
     if (index === -1) {
       throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     }
     const updatedAlbum: Album = {
-      ...albums[index],
+      ...db.albums[index],
       ...updateAlbumDto,
     };
-    albums[index] = updatedAlbum;
+    db.albums[index] = updatedAlbum;
     return updatedAlbum;
   }
 
   remove(id: string): boolean {
-    const index = albums.findIndex((album) => album.id === id);
+    const index = db.albums.findIndex((album) => album.id === id);
     if (index === -1) {
       return false;
     }
-    tracks.forEach((track) => {
+    db.tracks.forEach((track) => {
       if (track.albumId === id) {
         track.albumId = null;
       }
     });
-    albums.splice(index, 1);
+    db.albums.splice(index, 1);
     return true;
   }
 }

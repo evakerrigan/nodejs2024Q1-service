@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Album } from 'src/album/album.service';
 import { Artist } from 'src/artist/artist.service';
-import { albums, artists, tracks } from 'src/database/db';
+import { db } from 'src/database/db';
 import { Track } from 'src/track/track.service';
 import { validate as uuidValidate } from 'uuid';
 
@@ -29,13 +29,13 @@ export class FavoriteService {
 
   async findAll(): Promise<FavoritesResponse> {
     const foundArtists = await Promise.all(
-      this.favorites.artists.map((id) => artists.find((a) => a.id === id)),
+      this.favorites.artists.map((id) => db.artists.find((a) => a.id === id)),
     );
     const foundAlbums = await Promise.all(
-      this.favorites.albums.map((id) => albums.find((a) => a.id === id)),
+      this.favorites.albums.map((id) => db.albums.find((a) => a.id === id)),
     );
     const foundTracks = await Promise.all(
-      this.favorites.tracks.map((id) => tracks.find((a) => a.id === id)),
+      this.favorites.tracks.map((id) => db.tracks.find((a) => a.id === id)),
     );
 
     return {
@@ -49,7 +49,7 @@ export class FavoriteService {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
     }
-    if (!tracks.some((t) => t.id === id)) {
+    if (!db.tracks.some((t) => t.id === id)) {
       throw new HttpException(
         'Track not found',
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -70,7 +70,7 @@ export class FavoriteService {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
     }
-    if (!albums.some((t) => t.id === id)) {
+    if (!db.albums.some((t) => t.id === id)) {
       throw new HttpException(
         'Album not found',
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -91,7 +91,7 @@ export class FavoriteService {
     if (!uuidValidate(id)) {
       throw new Error('Invalid UUID');
     }
-    if (!artists.some((t) => t.id === id)) {
+    if (!db.artists.some((t) => t.id === id)) {
       throw new HttpException(
         'Artist not found',
         HttpStatus.UNPROCESSABLE_ENTITY,
