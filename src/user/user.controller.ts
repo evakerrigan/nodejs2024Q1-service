@@ -10,8 +10,7 @@ import {
   HttpException,
   HttpCode,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { User } from './user.service';
+import { User, UserService } from './user.service';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
 import { validate as uuidValidate } from 'uuid';
