@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './create-user.dto';
 import { UpdatePasswordDto } from './update-password.dto';
 import { validate as uuidValidate } from 'uuid';
-import { db } from 'src/database/db';
+import { Database } from 'src/database/db-postgres';
 
 export interface User {
   id: string;
@@ -14,33 +14,69 @@ export interface User {
   updatedAt: number;
 }
 
+interface UserInDb {
+  id: string;
+  login: string;
+  password: string;
+  version: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto): User {
-    const newUser: User = {
+  constructor(private readonly db: Database) {}
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const now = new Date();
+    const newUser: UserInDb = {
       ...createUserDto,
       id: uuidv4(),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      created_at: now,
+      updated_at: now,
       version: 1,
     };
-    db.users.push(newUser);
-    return newUser;
+    
+    const createdUser = await this.db.create<UserInDb>('users', newUser);
+    return {
+      id: createdUser.id,
+      login: createdUser.login,
+      password: createdUser.password,
+      version: createdUser.version,
+      createdAt: createdUser.created_at.getTime(),
+      updatedAt: createdUser.updated_at.getTime(),
+    };
   }
 
-  findAll(): User[] {
-    return db.users;
+  async findAll(): Promise<User[]> {
+    const users = await this.db.findAll<UserInDb>('users');
+    return users.map(user => ({
+      id: user.id,
+      login: user.login,
+      password: user.password,
+      version: user.version,
+      createdAt: user.created_at.getTime(),
+      updatedAt: user.updated_at.getTime(),
+    }));
   }
 
-  findOne(id: string): User {
-    const user = db.users.find((user) => user.id === id);
+  async findOne(id: string): Promise<User> {
+    const user = await this.db.findOne<UserInDb>('users', id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return user;
+    return {
+      id: user.id,
+      login: user.login,
+      password: user.password,
+      version: user.version,
+      createdAt: user.created_at.getTime(),
+      updatedAt: user.updated_at.getTime(),
+    };
   }
 
-  update(id: string, updatePasswordDto: UpdatePasswordDto): User {
+  async update(id: string, updatePasswordDto: UpdatePasswordDto): Promise<User> {
+    // Проверка типов паролей
     if (
       typeof updatePasswordDto.newPassword !== 'string' ||
       typeof updatePasswordDto.oldPassword !== 'string'
@@ -50,31 +86,41 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    // Проверка валидности UUID
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const index = db.users.findIndex((user) => user.id === id);
-    if (index === -1) {
+
+    // Получение пользователя
+    const user = await this.findOne(id);
+    if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    if (db.users[index].password !== updatePasswordDto.oldPassword) {
+
+    // Проверка старого пароля
+    if (user.password !== updatePasswordDto.oldPassword) {
       throw new HttpException('Wrong password', HttpStatus.FORBIDDEN);
     }
-    const updatedUser: User = {
-      ...db.users[index],
+
+    // Обновление пользователя
+    const updatedUser = await this.db.update<UserInDb>('users', id, {
       password: updatePasswordDto.newPassword,
-      updatedAt: Date.now(),
-      version: db.users[index].version + 1,
+      updated_at: new Date(),
+      version: user.version + 1,
+    });
+
+    return {
+      id: updatedUser.id,
+      login: updatedUser.login,
+      password: updatedUser.password,
+      version: updatedUser.version,
+      createdAt: updatedUser.created_at.getTime(),
+      updatedAt: updatedUser.updated_at.getTime(),
     };
-    db.users[index] = updatedUser;
-    return db.users[index];
   }
 
-  remove(id: string): void {
-    const index = db.users.findIndex((user) => user.id === id);
-    if (index === -1) {
-      throw new Error('User not found');
-    }
-    db.users.splice(index, 1);
+  async remove(id: string): Promise<void> {
+    await this.db.delete('users', id);
   }
 }

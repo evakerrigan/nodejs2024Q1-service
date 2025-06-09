@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateArtistDto } from './create-artist.dto';
-import { db } from 'src/database/db';
+import { db } from 'src/database/db-memory';
 
 export interface Artist {
   id: string;

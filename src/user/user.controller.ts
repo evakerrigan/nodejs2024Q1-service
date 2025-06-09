@@ -39,17 +39,17 @@ export class UserController {
   }
 
   @Get()
-  findAll(): User[] {
+  async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): User {
+  async findOne(@Param('id') id: string): Promise<User> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
     try {
-      const user = this.userService.findOne(id);
+      const user = await this.userService.findOne(id);
       return user;
     } catch (error) {
       if (
@@ -71,7 +71,10 @@ export class UserController {
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<Partial<User>> {
-    const updatedUser = this.userService.update(id, updatePasswordDto);
+    if (!uuidValidate(id)) {
+      throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
+    }
+    const updatedUser = await this.userService.update(id, updatePasswordDto);
     const userWithoutPassword = Object.keys(updatedUser).reduce((acc, key) => {
       if (key !== 'password') {
         acc[key] = updatedUser[key];
@@ -83,14 +86,14 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): void {
+  async remove(@Param('id') id: string): Promise<void> {
     if (!uuidValidate(id)) {
       throw new HttpException('Invalid UUID', HttpStatus.BAD_REQUEST);
     }
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    this.userService.remove(id);
+    await this.userService.remove(id);
   }
 }

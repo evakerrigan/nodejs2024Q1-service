@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Album } from 'src/album/album.service';
 import { Artist } from 'src/artist/artist.service';
-import { db } from 'src/database/db';
+import { db } from 'src/database/db-memory';
 import { Track } from 'src/track/track.service';
 import { validate as uuidValidate } from 'uuid';
 
