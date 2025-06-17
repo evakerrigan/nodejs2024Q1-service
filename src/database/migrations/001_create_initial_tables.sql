@@ -1,3 +1,6 @@
+-- Migration: 001_create_initial_tables
+-- Description: Initial database structure
+
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     login VARCHAR(255) NOT NULL,
@@ -34,4 +37,4 @@ CREATE TABLE favorites (
     artist_id UUID REFERENCES artists(id),
     album_id UUID REFERENCES albums(id),
     track_id UUID REFERENCES tracks(id)
-);
+); 
